@@ -601,7 +601,7 @@ pub fn run_script(
     context: &mut Globals,
     parser: Parser,
     dry_run: bool,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<Vec<String>> {
     let self_conn = SyncConnection::new_session()?;
     context.dbus_addr = self_conn.unique_name().to_string();
 
@@ -625,7 +625,7 @@ pub fn run_script(
 
     if dry_run {
         println!("{}", script_contents.trim());
-        return Ok(());
+        return Ok(Vec::new());
     }
 
     log::debug!("===== Load script into KWin =====");
@@ -703,9 +703,10 @@ pub fn run_script(
 
     log::debug!("===== Output =====");
     let messages = MESSAGES.read().unwrap();
+    let mut results: Vec<String> = Vec::new();
     for (msgtype, message) in messages.iter() {
         if msgtype == "result" {
-            println!("{message}");
+            results.push(message.clone());
         } else if msgtype == "error" {
             eprintln!("ERROR: {message}");
         } else {
@@ -719,7 +720,7 @@ pub fn run_script(
         println!("Script name: {}", context.script_name);
     }
 
-    Ok(())
+    Ok(results)
 }
 
 pub fn scripting_proxy(kwin_conn: &Connection) -> Proxy<'_, &Connection> {

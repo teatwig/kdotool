@@ -91,7 +91,11 @@ fn main() -> anyhow::Result<()> {
 
     let command = next_arg.unwrap();
 
-    run_script(&kwin_conn, command, &mut context, parser, opt_dry_run)?;
+    let results = run_script(&kwin_conn, command, &mut context, parser, opt_dry_run)?;
+
+    for message in results {
+        println!("{message}");
+    }
 
     Ok(())
 }
